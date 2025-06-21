@@ -14,6 +14,9 @@ An interactive quiz game that tests your programming knowledge with random multi
 - - **Friendly UI Alerts**: Enhanced feedback with [SweetAlert](https://sweetalert.js.org/)
 
 ---
+##Screenshot
+![App Screenshot](https://raw.githubusercontent.com/RISTONRODZ/Programming-Quiz-App/main/image.png)
+
 
 ## 🚀 Getting Started
 
