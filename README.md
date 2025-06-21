@@ -11,7 +11,7 @@ An interactive quiz game that tests your programming knowledge with random multi
 - **Randomized Programming Questions**: Powered by [OTDB API](https://opentdb.com/api_config.php)
 - **Responsive UI**: Clean and modern styling with CSS
 - **Framework-Free**: Built entirely with JavaScript
-- - **Friendly UI Alerts**: Enhanced feedback with [SweetAlert](https://sweetalert.js.org/)
+- **Friendly UI Alerts**: Enhanced feedback with [SweetAlert](https://sweetalert.js.org/)
 
 ---
 ## Screenshot
