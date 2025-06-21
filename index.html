@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background-color: #e9ebed;
+            display: flex;
+        }
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .main {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 50%;
+            height: 75%;
+            background-color: #ffffff;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            display: none;
+        }
+
+        .options {
+            background-color: #fff;
+            width: 80%;
+            height: 80%;
+            display: flex;
+            position: absolute;
+            flex-direction: column;
+            border-radius: 47px;
+            justify-content: center;
+            gap: 11px;
+        }
+
+        .option {
+            border: 1px solid black;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .mcqnumber {
+            position: absolute;
+            top: 84px;
+            z-index: 1;
+            left: 79px;
+        }
+
+        .question {
+            position: absolute;
+            z-index: 1;
+            top: 127px;
+            left: 78px;
+        }
+
+        .next {
+            position: absolute;
+            z-index: 1;
+            bottom: 55px;
+            right: 80px;
+            border-radius: 10px;
+            width: 49px;
+        }
+
+        .hidemain {
+            width: 100%;
+            height: 100%;
+            background-color: #d5d5d5;
+            display: block;
+            position: fixed;
+        }
+
+        .startquiz {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-direction: column;
+        }
+
+        .start {
+            width: 130px;
+            height: 45px;
+            border-radius: 24px;
+        }
+
+        .hidemain input {
+            padding: 10px;
+            width: 177px;
+            border-radius: 10px;
+
+        }
+
+        .tempelem {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color:  #d8bfd8;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="hidemain">
+        <div class="startquiz">
+            <div class="starttext">
+                <h3>
+                    test your programming knowledge
+                </h3>
+            </div>
+            <button class="start" onclick="start()">
+                Start Quiz
+            </button>
+            <input type="number" class="inputtext" placeholder="Enter number of questions (1-50)" min="1" max="50">
+        </div>
+    </div>
+    <div class="main">
+
+        <div class="container">
+            <div class="mcqnumber">
+                <h5>Number 1</h5>
+            </div>
+            <div class="question">
+                <p>what is yor name</p>
+            </div>
+            <div class="options">
+
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            let currentQuestionIndex = 0;
+            let quizQuestions = [];
+            let score = 0;
+            let nextButton = null;
+            const hidemainDiv = document.querySelector(".hidemain");
+            const mainDiv = document.querySelector(".main");
+            const containerDiv = document.querySelector(".container");
+            const inputText = document.querySelector(".inputtext");
+            const mcqNumberElement = document.querySelector('.mcqnumber h5');
+            const questionElement = document.querySelector('.question p');
+            const optionsContainer = document.querySelector('.options');
+
+
+            let loadingSpinner = null;
+
+            function delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            async function start() {
+                const num = parseInt(inputText.value);
+
+                if (isNaN(num) || num < 1 || num > 50) {
+                    Swal.fire({
+                        title: "Invalid Input",
+                        text: "Number of questions must be between 1 and 50.",
+                        icon: "error"
+                    });
+                    return;
+                }
+
+                if (loadingSpinner) {
+                    console.warn("Quiz already starting or loading. Please wait.");
+                    return;
+                }
+
+                hidemainDiv.style.display = "none";
+
+                loadingSpinner = document.createElement("div");
+                loadingSpinner.classList.add("tempelem");
+                loadingSpinner.textContent = "The questions are being fetched......";
+                document.body.appendChild(loadingSpinner);
+
+                try {
+                    await delay(5000);
+
+                    const quizData = await fetchdata(num);
+
+                    console.log("Successfully fetched quiz data:", quizData);
+                    mainDiv.style.display = "flex";
+                    containerDiv.style.display = "flex";
+                    renderContent(quizData);
+
+                } catch (error) {
+                    console.error("Quiz startup process failed:", error);
+                    mainDiv.style.display = "none";
+                    containerDiv.style.display = "none";
+                    hidemainDiv.style.display = "flex";
+                } finally {
+                    if (loadingSpinner && loadingSpinner.parentNode) {
+                        loadingSpinner.remove();
+                        loadingSpinner = null;
+                    }
+                }
+            }
+
+            async function fetchdata(amount) {
+                try {
+                    const response = await fetch(`https://opentdb.com/api.php?amount=${amount}&category=18&type=multiple`);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const json_data = await response.json();
+
+                    if (json_data.response_code !== 0) {
+                        let apiErrorMessage = `API error: ${json_data.response_code}. `;
+                        if (json_data.response_code === 1) {
+                            apiErrorMessage += "No results could be returned for your query (try different amount).";
+                        } else if (json_data.response_code === 2) {
+                            apiErrorMessage += "Invalid parameter (amount or type issue).";
+                        } else if (json_data.response_code === 3) {
+                            apiErrorMessage += "Token Not Found (Session Token does not exist).";
+                        } else if (json_data.response_code === 4) {
+                            apiErrorMessage += "Token Empty (Session Token has returned all possible questions for the specified query).";
+                        }
+                        throw new Error(apiErrorMessage);
+                    }
+
+                    return json_data.results;
+
+                } catch (error) {
+                    console.error("Fetchdata specific error:", error);
+                    Swal.fire({
+                        title: "Failed to load quiz data",
+                        text: `Details: ${error.message || 'Unknown error'}`,
+                        icon: "error"
+                    });
+                    throw error;
+                } finally {
+                }
+            }
+            function renderContent(qd) {
+                quizQuestions = qd;
+                currentQuestionIndex = 0;
+                score = 0;
+                if (!nextButton) {
+                    nextButton = document.createElement("button")
+                    nextButton.classList.add("next")
+                    nextButton.textContent = 'Next'
+                    containerDiv.appendChild(nextButton);
+                    nextButton.addEventListener('click', goToNextQuestion);
+                }
+                nextButton.style.display = 'none';
+                displayQuestion();
+            }
+            function displayQuestion() {
+                if (currentQuestionIndex >= quizQuestions.length) {
+                    endQuiz()
+                }
+                const questionData = quizQuestions[currentQuestionIndex]
+                mcqNumberElement.textContent = `Question ${currentQuestionIndex + 1}`
+                questionElement.innerHTML = decodeHtml(questionData.question);
+                optionsContainer.innerHTML = '';
+                const options = prepareOptions(questionData);
+                options.forEach((optionText, index )=> {
+                    const optionDiv = document.createElement("div")
+                    optionDiv.classList.add('option')
+                    const p = document.createElement('p')
+                    p.innerHTML = `<span>${index + 1}.</span> ${decodeHtml(optionText)}`
+                    optionDiv.appendChild(p);
+                    optionDiv.addEventListener('click', () => {
+                        handleOptionClick(optionDiv, optionText, questionData.correct_answer)
+                    })
+                    optionsContainer.appendChild(optionDiv);
+
+                });
+                if (nextButton) {
+                    nextButton.style.display = 'none'
+
+                }
+                containerDiv.dataset.answered = 'false'
+            }
+            function handleOptionClick(clickedOptionDiv, selectedAnswer, correctAnswer) {
+                if (containerDiv.dataset.answered === 'true') {
+                    return;
+                }
+                containerDiv.dataset.answered = 'true';
+                Array.from(optionsContainer.children).forEach(option => {
+                    option.style.pointerEvents = 'none';
+                });
+                if (selectedAnswer === correctAnswer) {
+                    clickedOptionDiv.style.backgroundColor = '#d4edda';
+                    clickedOptionDiv.style.borderColor = '#28a745';
+                    score++;
+                } else {
+                    clickedOptionDiv.style.backgroundColor = '#f8d7da';
+                    clickedOptionDiv.style.borderColor = '#dc3545';
+                    Array.from(optionsContainer.children).forEach(option => {
+                        const optionTextContent = decodeHtml(option.querySelector('p').textContent.replace(/^\d+\.\s*/, '').trim());
+                        if (optionTextContent === correctAnswer) {
+                            option.style.backgroundColor = '#d4edda';
+                            option.style.borderColor = '#28a745';
+                        }
+                    });
+                }
+                if (nextButton) {
+                    nextButton.style.display = 'block';
+                }
+            }
+            function goToNextQuestion() {
+                currentQuestionIndex++;
+                if (nextButton) {
+                    nextButton.style.display = 'none';
+                }
+                displayQuestion();
+            }
+            function endQuiz(){
+                containerDiv.innerHTML = `<h2>Quiz Finished!</h2>
+                <p>Your final score :${score} out of ${quizQuestions.length}</p>
+                <button class="start" onclick="location.reload()">Restart Quiz</Button> `
+            }
+            function decodeHtml(html) {
+                const textArea = document.createElement('textarea');
+                textArea.innerHTML = html;
+                return textArea.value;
+            }
+
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+            function prepareOptions(questionData) {
+                const allOptions = [
+                    questionData.correct_answer,
+                    ...questionData.incorrect_answers
+                ];
+                return shuffleArray(allOptions);
+            }
+        </script>
+</body>
+
+</html>
