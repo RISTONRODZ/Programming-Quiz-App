@@ -41,9 +41,8 @@ Open `index.html` in your browser, or serve the project with a local development
 
 ### Landing page
 ![Landing page](https://raw.githubusercontent.com/RISTONRODZ/Programming-Quiz-App/main/landing.png)
-
-### Quiz interface
-![Quiz interface](https://raw.githubusercontent.com/RISTONRODZ/Programming-Quiz-App/main/image.png)
+### Quiz Interface
+![Quiz Interface](https://raw.githubusercontent.com/RISTONRODZ/Programming-Quiz-App/main/questionui.png)
 
 ### Input validation
 ![Input validation](https://raw.githubusercontent.com/RISTONRODZ/Programming-Quiz-App/main/invalid.png)
@@ -51,8 +50,6 @@ Open `index.html` in your browser, or serve the project with a local development
 ### Loading state
 ![Loading state](https://raw.githubusercontent.com/RISTONRODZ/Programming-Quiz-App/main/fetch.png)
 
-### Question view
-![Question view](https://raw.githubusercontent.com/RISTONRODZ/Programming-Quiz-App/main/question.png)
 
 ### End screen
 ![End screen](https://raw.githubusercontent.com/RISTONRODZ/Programming-Quiz-App/main/endui.png)
